@@ -40,11 +40,13 @@ def Find_Periodic_Points(t_data, y_data, search_factor = 400, step_size = 1): #o
     return t_points, y_points #t_points is a list of all points where wave repeats. i.e. t_points[i] - t_points[i-1] = period
 
 def Get_Average_Frequencies(filecount, graphing = False):
+
+    #background_noise = np.loadtxt should add background noise subtraction
     avg_frequencies = []
     for file_no in range(2, filecount + 1):
         print(file_no)
-        #t_data, y_data = np.loadtxt(f"Data\\Waveform_Data\\WFM49.CSV", delimiter=",", skiprows=1, unpack=True) #runs 1 specific file
-        t_data, y_data = np.loadtxt(f"Data\\Waveform_Data\\WFM{file_no}.CSV", delimiter=",", skiprows=1, unpack=True) #runs all files (comment out as you see fit)
+        t_data, y_data = np.loadtxt(f"Data\\Waveform_Data\\WFM2.CSV", delimiter=",", skiprows=1, unpack=True) #runs 1 specific file
+        #t_data, y_data = np.loadtxt(f"Data\\Waveform_Data\\WFM{file_no}.CSV", delimiter=",", skiprows=1, unpack=True) #runs all files (comment out as you see fit)
         #inter_x = t_data
         inter_x = np.linspace(t_data[0], t_data[-1], 100000)
         inter_f = sp.interpolate.interp1d(t_data, y_data, kind="linear")
@@ -72,7 +74,7 @@ def Get_Average_Frequencies(filecount, graphing = False):
     return avg_frequencies
 
 #main code
-#avg_frequencies = Get_Average_Frequencies(2, True) #runs 1 iteration
-avg_frequencies = Get_Average_Frequencies(49, False) #runs 49 iterations. does not display graphs. (comment out as you see fit)
+avg_frequencies = Get_Average_Frequencies(2, True) #runs 1 iteration
+#avg_frequencies = Get_Average_Frequencies(49, True) #runs 49 iterations. does not display graphs. (comment out as you see fit)
 print(avg_frequencies)
 

@@ -13,16 +13,19 @@ plt.plot(t_data, y_data)
 
 plt.xlabel("Time [s]")
 plt.ylabel("Voltage [V]")
+plt.title(f"Unfiltered {wavetype} Wave Playing Note {note}")
 plt.grid()
 
 #filtered
 t_data, y_data = np.loadtxt(f"Data\\Waveform_Data\\{wavetype}\\Filtered\\{note}.CSV", delimiter=",", skiprows=1, unpack=True)
+t_data = t_data[::-1]
 
 plt.figure()
 plt.plot(t_data, y_data)
 
 plt.xlabel("Time [s]")
 plt.ylabel("Voltage [V]")
+plt.title(f"Filtered {wavetype} Wave Playing Note {note}")
 plt.grid()
 
 plt.show()

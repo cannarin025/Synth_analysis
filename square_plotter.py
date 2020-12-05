@@ -13,6 +13,7 @@ plt.plot(t_data, y_data)
 
 plt.xlabel("Time [s]")
 plt.ylabel("Voltage [V]")
+plt.title(f"Filtered {wavetype} wave playing note {note}")
 plt.grid()
 
 #filtered
@@ -23,6 +24,7 @@ plt.plot(t_data, y_data)
 
 plt.xlabel("Time [s]")
 plt.ylabel("Voltage [V]")
+plt.title(f"Filtered {wavetype} Wave Playing Note {note}")
 plt.grid()
 
 plt.show()

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 def Find_Periodic_Points(t_data, y_data, tolerance = 0.95, step_size = 1, graphing = False):
     t_points = []
     y_points = []
+    intersection_errors = []
     y_max = 0
     y_min = 0
     t_max = 0
@@ -46,22 +47,29 @@ def Find_Periodic_Points(t_data, y_data, tolerance = 0.95, step_size = 1, graphi
 
             #calculating intersection
             lobf_grad = lobf[0]
+            y0 = y_data[0] #line of constant y
+            grad_error = np.sqrt(cov[0][0]) #getting standard deviation of gradient
+            y_int_error = np.sqrt(cov[1][1]) #getting standard deviation of y intercept
             lobf_intercept = lobf[1]
-            intersection = (y_data[0] - lobf_intercept) / lobf_grad  # intersection of best fit line with desired y value gives next t value
+            intersection = (y0 - lobf_intercept) / lobf_grad  # intersection of best fit line with desired y value gives next t value
             if intersection <= t_data[-1]:
                 if intersection not in t_points: #checks that last value isnt duplicate (situation can arise due to y[i] == y[-1] condition drawing same lobf twice
                     t_points.append(intersection)
                     y_points.append(lobf_grad * intersection + lobf_intercept)
+                    intersection_errors.append(np.sqrt( ((((y0 - lobf_intercept)**2)/(lobf_grad)**4) * (grad_error/lobf_grad)**2) + (((y_int_error/lobf_intercept)**2) * 1 / (lobf_grad**2)) ) * intersection)
 
             #resetting for next tooth
             wait = True #ensures plotting etc is not done again on rising edge
 
-    return t_points, y_points
+    avg_period_error = sum(intersection_errors)/len(intersection_errors)
+
+    return t_points, y_points, avg_period_error
 
 def Get_Average_Frequencies(filecount, graphing = False):
 
     #background_noise = np.loadtxt should add background noise subtraction
     avg_frequencies = []
+    avg_freq_errors = []
     for file_no in range(2, filecount + 1):
         print(file_no)
         #t_data, y_data = np.loadtxt(f"Data\\Waveform_Data\\Saw\\Unfiltered\\WFM10.CSV", delimiter=",", skiprows=1, unpack=True) #runs 1 specific file
@@ -70,7 +78,7 @@ def Get_Average_Frequencies(filecount, graphing = False):
         inter_x = np.linspace(t_data[0], t_data[-1], 100000)
         inter_f = sp.interpolate.interp1d(t_data, y_data, kind="linear")
         inter_y = inter_f(inter_x)
-        t_points, y_points = Find_Periodic_Points(inter_x, inter_y, step_size=1, graphing = graphing)
+        t_points, y_points, avg_period_error = Find_Periodic_Points(inter_x, inter_y, step_size=1, graphing = graphing)
         #t_points, y_points = Find_Periodic_Points(inter_x, inter_y, step_size=5)
 
         if graphing:
@@ -86,14 +94,18 @@ def Get_Average_Frequencies(filecount, graphing = False):
 
         # calculate avg frequency
         frequencies = []
+        periods = []
         for i in range(1, len(t_points)):
+            periods.append(t_points[i] - t_points[i - 1])
             freq = 1 / (t_points[i] - t_points[i - 1])
             frequencies.append(freq)
+        avg_period = sum(periods)/len(periods)
         avg_freq = sum(frequencies) / len(frequencies)
         avg_frequencies.append(avg_freq)
+        avg_freq_errors.append((1/(avg_period**2))*avg_period_error)
         # print(avg_freq, "Hz")
 
-    return avg_frequencies
+    return avg_frequencies, avg_freq_errors
 
 #main code
 musical_frequencies = [65.41, 69.30, 73.42, 77.78, 82.41, 87.31, 92.50, 98.00, 103.83, 110.00, 116.54, 123.47,
@@ -102,7 +114,7 @@ musical_frequencies = [65.41, 69.30, 73.42, 77.78, 82.41, 87.31, 92.50, 98.00, 1
                        523.25, 554.37, 587.33, 622.25, 659.25, 698.46, 739.99, 783.99, 830.61, 880.00, 932.33, 987.77] #musical frequencies of notes played in range C2-B5
 
 #avg_frequencies = Get_Average_Frequencies(2, True) #runs 1 iteration
-avg_frequencies = Get_Average_Frequencies(49, False) #runs 49 iterations. does not display graphs. (comment out as you see fit)
+avg_frequencies, avg_freq_errors = Get_Average_Frequencies(49, False) #runs 49 iterations. does not display graphs. (comment out as you see fit)
 frequency_errors = np.abs(np.array(musical_frequencies) - np.array(avg_frequencies))
 print(avg_frequencies)
 
